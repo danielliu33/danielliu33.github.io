@@ -1,0 +1,151 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPosts, postHref, tagHref, readingMinutes, formatDate, isoDate, isDraft, type Post } from '../../lib/posts';
+import { site } from '../../data/profile';
+import { smart } from '../../lib/typography';
+
+export async function getStaticPaths() {
+  const posts = await getPosts(); // newest first
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    // "newer" is the next post forward in time, "older" the one before it.
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+
+interface Props {
+  post: Post;
+  newer?: Post;
+  older?: Post;
+}
+
+const { post, newer, older } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await render(post);
+const { title, description, date, updated, tags } = post.data;
+const draft = isDraft(post);
+const minutes = readingMinutes(post.body);
+const canonical = new URL(postHref(post), Astro.site).href;
+const author = { '@type': 'Person', name: site.name, url: `${site.url}/` };
+
+const blogPosting = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: smart(title),
+  description: smart(description),
+  datePublished: date.toISOString(),
+  dateModified: (updated ?? date).toISOString(),
+  author,
+  publisher: author,
+  mainEntityOfPage: canonical,
+  url: canonical,
+  ...(tags.length > 0 ? { keywords: tags.join(', ') } : {}),
+};
+---
+
+<BaseLayout
+  title={smart(title)}
+  description={smart(description)}
+  type="article"
+  publishedTime={date}
+  modifiedTime={updated}
+  math={remarkPluginFrontmatter.math === true}
+  noindex={draft}
+  jsonLd={blogPosting}
+>
+  <article>
+    <header class="page-head">
+      <p class="meta">
+        <time datetime={isoDate(date)}>{formatDate(date)}</time>
+        {
+          updated && (
+            <>
+              {' · Updated '}
+              <time datetime={isoDate(updated)}>{formatDate(updated)}</time>
+            </>
+          )
+        }
+        {` · ${minutes} min read`}
+        {draft && <span class="draft"> · Draft (not published)</span>}
+      </p>
+      <h1 class="page-title">{smart(title)}</h1>
+      <p class="lede">{smart(description)}</p>
+      {
+        tags.length > 0 && (
+          <ul class="tags" aria-label="Tags">
+            {tags.map((tag) => (
+              <li>
+                <a href={tagHref(tag)} rel="tag">
+                  {tag}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+
+  <nav class="pager" aria-label="More writing">
+    {
+      older ? (
+        <a class="prev" href={postHref(older)} rel="prev">
+          <span class="label">Older</span>
+          <span class="t">{smart(older.data.title)}</span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      newer ? (
+        <a class="next" href={postHref(newer)} rel="next">
+          <span class="label">Newer</span>
+          <span class="t">{smart(newer.data.title)}</span>
+        </a>
+      ) : (
+        <a class="next" href="/writing/">
+          <span class="label">All writing</span>
+          <span class="t">Back to the index</span>
+        </a>
+      )
+    }
+  </nav>
+</BaseLayout>
+
+<style>
+  .page-head .meta {
+    margin: 0 0 0.875rem;
+  }
+
+  .draft {
+    color: var(--accent);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem 0.875rem;
+    list-style: none;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    font-family: var(--sans);
+    font-size: 0.8125rem;
+  }
+
+  .tags a {
+    color: var(--muted);
+  }
+
+  .tags a:hover {
+    color: var(--accent);
+  }
+
+  .tags a::before {
+    content: '#';
+    opacity: 0.6;
+  }
+</style>

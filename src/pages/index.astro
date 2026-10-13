@@ -1,0 +1,126 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Email from '../components/Email.astro';
+import WorkList from '../components/WorkList.astro';
+import Timeline from '../components/Timeline.astro';
+import Publications from '../components/Publications.astro';
+import PostList from '../components/PostList.astro';
+import { site, links } from '../data/profile';
+import { getPosts } from '../lib/posts';
+
+const posts = await getPosts();
+const latest = posts.slice(0, 5);
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  url: site.url + '/',
+  description: site.metaDescription,
+  sameAs: [links.linkedin],
+  knowsAbout: ['Post-training', 'Evaluation', 'AI agents', 'Ranking and recommendation systems'],
+  alumniOf: { '@type': 'CollegeOrUniversity', name: 'University of Illinois Urbana-Champaign' },
+};
+---
+
+<BaseLayout jsonLd={person}>
+  <section class="hero" aria-labelledby="name">
+    <h1 id="name" class="name">{site.name}</h1>
+    <p class="headline">{site.headline}</p>
+    <p class="subhead">{site.subhead}</p>
+    <p class="contact">
+      <Email label="Email" />
+      <span aria-hidden="true">·</span>
+      <a href={links.linkedin} rel="me">LinkedIn</a>
+      <span aria-hidden="true">·</span>
+      <a href={links.resumePdf} download={`${site.name.replace(/\s+/g, '-')}-Resume.pdf`}>Résumé (PDF)</a>
+    </p>
+  </section>
+
+  <section class="section" aria-labelledby="work">
+    <h2 id="work" class="section-label">Selected work</h2>
+    <WorkList />
+  </section>
+
+  {
+    latest.length > 0 && (
+      <section class="section" aria-labelledby="writing">
+        <h2 id="writing" class="section-label">Writing</h2>
+        <PostList posts={latest} />
+        {posts.length > latest.length && (
+          <p class="section-more">
+            <a href="/writing/">All writing</a>
+          </p>
+        )}
+      </section>
+    )
+  }
+
+  <section class="section" aria-labelledby="experience">
+    <h2 id="experience" class="section-label">Experience</h2>
+    <Timeline />
+    <p class="section-more"><a href="/resume/">Full résumé</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="publications">
+    <h2 id="publications" class="section-label">Publications &amp; patent</h2>
+    <Publications />
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-top: 1.5rem;
+  }
+
+  .name {
+    font-size: clamp(2.375rem, 1.9rem + 2vw, 3.125rem);
+    font-weight: 500;
+    letter-spacing: -0.018em;
+    line-height: 1.05;
+    margin: 0 0 1.125rem;
+  }
+
+  .headline {
+    font-family: var(--serif);
+    font-size: clamp(1.5rem, 1.22rem + 1.2vw, 1.9375rem);
+    line-height: 1.28;
+    font-weight: 400;
+    letter-spacing: -0.006em;
+    color: var(--ink);
+    margin: 0 0 1.25rem;
+    text-wrap: balance;
+  }
+
+  .subhead {
+    font-size: 1.1875rem;
+    line-height: 1.55;
+    color: var(--ink-2);
+    margin: 0 0 1.75rem;
+    max-width: 36rem;
+  }
+
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 0.9375rem;
+    color: var(--muted);
+  }
+
+  .contact :global(a) {
+    color: var(--ink);
+  }
+
+  .contact :global(a:hover) {
+    color: var(--accent);
+  }
+
+  @media (max-width: 40em) {
+    .subhead {
+      font-size: 1.0625rem;
+    }
+  }
+</style>

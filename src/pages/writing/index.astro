@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+import { getPosts, tagHref } from '../../lib/posts';
+
+const posts = await getPosts();
+const tags = [...new Set(posts.flatMap((p) => p.data.tags))].sort((a, b) => a.localeCompare(b));
+---
+
+<BaseLayout title="Writing" description="Essays and notes by Daniel Liu on AI agents, evaluation, and post-training." noindex={posts.length === 0}>
+  <header class="page-head">
+    <h1 class="page-title">Writing</h1>
+    <p class="lede">Essays and notes on AI agents, evaluation, and post-training.</p>
+  </header>
+
+  {posts.length > 0 ? <PostList posts={posts} headingLevel={2} /> : <p class="empty">Nothing published yet.</p>}
+
+  {
+    tags.length > 0 && (
+      <section class="section" aria-labelledby="tags">
+        <h2 id="tags" class="section-label">Tags</h2>
+        <ul class="tags">
+          {tags.map((tag) => (
+            <li>
+              <a href={tagHref(tag)}>{tag}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    posts.length > 0 && (
+      <p class="section-more">
+        <a href="/rss.xml">Subscribe via RSS</a>
+      </p>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .empty {
+    color: var(--muted);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--sans);
+    font-size: 0.875rem;
+  }
+
+  .section-more {
+    margin-top: 3rem;
+  }
+</style>

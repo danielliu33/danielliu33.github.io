@@ -1,0 +1,17 @@
+---
+/**
+ * Obfuscated email. The address is assembled by a tiny inline script in the
+ * layout; without JavaScript the reader sees "user [at] domain [dot] com".
+ */
+import { email } from '../data/profile';
+
+interface Props {
+  /** Link text once revealed; defaults to the address itself. */
+  label?: string;
+  class?: string;
+}
+
+const { label, class: className } = Astro.props;
+---
+
+<span class:list={['email', className]} data-eu={email.user} data-ed={email.domain} data-label={label}>{email.fallback}</span>

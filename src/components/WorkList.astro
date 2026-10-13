@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import { smart } from '../lib/typography';
+
+interface Props {
+  headingLevel?: 2 | 3;
+}
+
+const { headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<ul class="entries">
+  {
+    work.map((item) => (
+      <li class="entry">
+        <Heading class="entry-title">
+          <a href={`/work/${item.id}/`}>{smart(item.data.title)}</a>
+        </Heading>
+        <p class="meta">
+          {item.data.org} · {item.data.years}
+        </p>
+        <p class="entry-text">{smart(item.data.one_liner)}</p>
+      </li>
+    ))
+  }
+</ul>

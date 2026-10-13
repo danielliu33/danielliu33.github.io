@@ -1,0 +1,68 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { smart } from '../../lib/typography';
+
+export async function getStaticPaths() {
+  const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+  return work.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, prev: work[i - 1], next: work[i + 1] },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'work'>;
+  prev?: CollectionEntry<'work'>;
+  next?: CollectionEntry<'work'>;
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await render(entry);
+const title = smart(entry.data.title);
+---
+
+<BaseLayout title={title} description={smart(entry.data.one_liner)} type="article" math={remarkPluginFrontmatter.math === true}>
+  <article>
+    <header class="page-head">
+      <p class="label">{entry.data.org} · {entry.data.years}</p>
+      <h1 class="page-title">{title}</h1>
+      <p class="lede">{smart(entry.data.one_liner)}</p>
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+
+  <nav class="pager" aria-label="More case studies">
+    {
+      prev ? (
+        <a class="prev" href={`/work/${prev.id}/`} rel="prev">
+          <span class="label">Previous</span>
+          <span class="t">{smart(prev.data.title)}</span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      next ? (
+        <a class="next" href={`/work/${next.id}/`} rel="next">
+          <span class="label">Next</span>
+          <span class="t">{smart(next.data.title)}</span>
+        </a>
+      ) : (
+        <a class="next" href="/work/">
+          <span class="label">All work</span>
+          <span class="t">Back to the list</span>
+        </a>
+      )
+    }
+  </nav>
+</BaseLayout>
+
+<style>
+  .page-head .label {
+    margin: 0 0 1rem;
+  }
+</style>

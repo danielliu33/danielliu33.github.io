@@ -1,0 +1,597 @@
+/* ------------------------------------------------------------------------
+   Editorial minimal: one calm column, serif text, small sans labels.
+   Colors are tokens on :root; dark values apply via [data-theme="dark"]
+   (set before paint by the inline head script) or, without JS, via
+   prefers-color-scheme.
+   ------------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light;
+  --bg: #faf8f4;
+  --bg-soft: #f2eee6;
+  --ink: #1d1b18;
+  --ink-2: #45413a;
+  --muted: #6a6358;
+  --rule: #e3ddd2;
+  --accent: #9a3a17;
+  --accent-soft: color-mix(in srgb, var(--accent) 38%, transparent);
+  --focus: #9a3a17;
+  --selection: #f1dccd;
+
+  --serif: 'Newsreader Variable', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --measure: 36rem;   /* 576px column: ~70 characters per line at 19px */
+  --gutter: 1rem;     /* 16px side gutters on small screens */
+  --space-section: 4.5rem;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #1a1815;
+  --bg-soft: #24211d;
+  --ink: #ece6dc;
+  --ink-2: #cdc5b8;
+  --muted: #a59c8e;
+  --rule: #38332d;
+  --accent: #e9a27f;
+  --focus: #e9a27f;
+  --selection: #4a3428;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #1a1815;
+    --bg-soft: #24211d;
+    --ink: #ece6dc;
+    --ink-2: #cdc5b8;
+    --muted: #a59c8e;
+    --rule: #38332d;
+    --accent: #e9a27f;
+    --focus: #e9a27f;
+    --selection: #4a3428;
+  }
+}
+
+/* ---------- base ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.1875rem; /* 19px */
+  line-height: 1.6;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 40em) {
+  body {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.55;
+  }
+}
+
+::selection {
+  background: var(--selection);
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--serif);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--accent-soft);
+}
+
+a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 3rem 0;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--mono);
+  font-size: 0.84em;
+}
+
+/* ---------- layout ---------- */
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--measure) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@media (min-width: 40em) {
+  :root {
+    --gutter: 1.5rem;
+  }
+}
+
+main {
+  display: block;
+  flex: 1 0 auto; /* keeps the footer at the bottom of short pages */
+  padding-block: 3.5rem 5rem;
+}
+
+main:focus {
+  outline: none;
+}
+
+@media (max-width: 40em) {
+  main {
+    padding-block: 2.25rem 4rem;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -10rem;
+  z-index: 10;
+  padding: 0.5rem 0.875rem;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  text-decoration: none;
+  border-radius: 3px;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+  color: var(--bg);
+}
+
+/* ---------- small sans labels ---------- */
+
+.label,
+.section-label {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.meta {
+  font-family: var(--sans);
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.section {
+  margin-top: var(--space-section);
+}
+
+.section-label {
+  margin: 0 0 1.5rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.section-more {
+  margin-top: 1.25rem;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+}
+
+/* ---------- page heads ---------- */
+
+.page-head {
+  margin-bottom: 2.5rem;
+}
+
+.page-title {
+  font-size: clamp(2rem, 1.6rem + 1.6vw, 2.6rem);
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.lede {
+  font-size: 1.3125rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+/* ---------- lists of entries (work, posts) ---------- */
+
+.entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.entry + .entry {
+  margin-top: 2rem;
+}
+
+.entry-title {
+  font-size: 1.375rem;
+  margin: 0 0 0.25rem;
+}
+
+.entry-title a {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--accent-soft);
+  text-underline-offset: 0.18em;
+}
+
+.entry-title a:hover {
+  text-decoration-color: currentColor;
+}
+
+.entry .meta {
+  margin: 0 0 0.375rem;
+}
+
+.entry p:last-child {
+  margin-bottom: 0;
+}
+
+.entry-text {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+/* ---------- prose (case studies, posts, about) ---------- */
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose p,
+.prose ul,
+.prose ol,
+.prose blockquote,
+.prose pre,
+.prose table,
+.prose figure {
+  margin: 0 0 1.25em;
+}
+
+.prose h2 {
+  font-size: 1.5rem;
+  margin: 2.5em 0 0.75em;
+  position: relative;
+}
+
+.prose h3 {
+  font-size: 1.25rem;
+  margin: 2em 0 0.5em;
+  position: relative;
+}
+
+.prose h4 {
+  font-size: 1.0625rem;
+  margin: 1.75em 0 0.5em;
+  position: relative;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.25em;
+}
+
+.prose li + li {
+  margin-top: 0.375em;
+}
+
+.prose li::marker {
+  color: var(--muted);
+}
+
+.prose a {
+  color: var(--accent);
+}
+
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+.prose blockquote {
+  margin-left: 0;
+  padding-left: 1.25em;
+  border-left: 2px solid var(--rule);
+  color: var(--ink-2);
+  font-style: italic;
+}
+
+.prose :not(pre) > code {
+  background: var(--bg-soft);
+  padding: 0.12em 0.32em;
+  border-radius: 3px;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  display: block;
+  overflow-x: auto;
+}
+
+.prose th,
+.prose td {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.5em 0.75em 0.5em 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  font-family: var(--sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.prose img {
+  display: block;
+  margin-inline: auto;
+}
+
+.prose hr {
+  margin: 2.5rem auto;
+  width: 30%;
+}
+
+/* heading anchors (added by a small rehype plugin; the "#" comes from CSS) */
+.heading-anchor {
+  margin-left: 0.15em;
+  padding: 0.25rem 0.375rem;
+  text-decoration: none;
+  color: var(--muted);
+  opacity: 0;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.8em;
+}
+
+.heading-anchor::after {
+  content: '#';
+}
+
+h2:hover > .heading-anchor,
+h3:hover > .heading-anchor,
+h4:hover > .heading-anchor,
+.heading-anchor:focus-visible {
+  opacity: 1;
+}
+
+/* Touch screens have no hover; hide the anchors rather than show faint targets. */
+@media (hover: none) {
+  .heading-anchor {
+    display: none;
+  }
+}
+
+/* code blocks: Shiki dual themes via CSS variables */
+.prose pre {
+  background: var(--bg-soft) !important;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1rem 1.125rem;
+  overflow-x: auto;
+  line-height: 1.55;
+  font-size: 0.875rem;
+  tab-size: 2;
+}
+
+.prose pre code {
+  font-size: inherit;
+  background: none;
+  padding: 0;
+}
+
+.astro-code,
+.astro-code span {
+  color: var(--shiki-light);
+}
+
+:root[data-theme='dark'] .astro-code,
+:root[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .astro-code,
+  :root:not([data-theme='light']) .astro-code span {
+    color: var(--shiki-dark);
+  }
+}
+
+/* math */
+.prose .katex-display {
+  margin: 1.5em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25em 0;
+}
+
+.prose .katex {
+  font-size: 1.05em;
+}
+
+/* footnotes (GFM) */
+.prose sup a,
+.prose a[data-footnote-ref] {
+  text-decoration: none;
+  font-family: var(--sans);
+  font-size: 0.75em;
+  padding-inline: 0.1em;
+}
+
+.prose .footnotes {
+  margin-top: 3.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.9375rem;
+  color: var(--ink-2);
+}
+
+.prose .footnotes h2 {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 1rem;
+}
+
+.prose .footnotes .heading-anchor {
+  display: none;
+}
+
+.prose .footnotes ol {
+  padding-left: 1.25em;
+}
+
+.prose .data-footnote-backref,
+.prose a[data-footnote-backref] {
+  text-decoration: none;
+  font-family: var(--sans);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- prev / next ---------- */
+
+.pager {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.pager a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-decoration: none;
+}
+
+.pager .next {
+  text-align: right;
+}
+
+.pager .t {
+  line-height: 1.35;
+  font-size: 1.0625rem;
+}
+
+.pager a:hover .t {
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+}
+
+@media (max-width: 34em) {
+  .pager {
+    grid-template-columns: 1fr;
+  }
+
+  .pager .next {
+    text-align: left;
+  }
+}
+
+/* ---------- motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

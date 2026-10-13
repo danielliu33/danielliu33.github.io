@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WorkList from '../../components/WorkList.astro';
+import Publications from '../../components/Publications.astro';
+---
+
+<BaseLayout title="Work" description="Case studies by Daniel Liu: evaluation and post-training for an AI assistant for advertisers, recommendation systems for small businesses, and a multi-agent marketing platform.">
+  <header class="page-head">
+    <h1 class="page-title">Work</h1>
+    <p class="lede">Case studies from Meta and from the startup I founded.</p>
+  </header>
+
+  <WorkList headingLevel={2} />
+
+  <section class="section" aria-labelledby="publications">
+    <h2 id="publications" class="section-label">Publications &amp; patent</h2>
+    <Publications />
+  </section>
+</BaseLayout>

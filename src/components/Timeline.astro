@@ -1,0 +1,159 @@
+---
+/**
+ * Compact, reverse-chronological experience timeline for the home page
+ * (years only). Each role shows its summary and only its `featured`
+ * bullets; the full detail lives on the résumé.
+ */
+import { experience, researchTimeline } from '../data/profile';
+
+const pick = (bullets: string[], featured: number[] = []) =>
+  featured.map((i) => bullets[i]).filter((b): b is string => Boolean(b));
+---
+
+<ol class="timeline">
+  {
+    experience.map((role) => {
+      const points = pick(role.bullets, role.featured);
+      return (
+        <li class="row">
+          <span class="years meta">{role.years}</span>
+          <div class="what">
+            <p class="role">
+              <span class="org">{role.org}</span>
+              <span class="sep" aria-hidden="true"> · </span>
+              <span>{role.role}</span>
+            </p>
+            {role.summary && <p class="summary">{role.summary}</p>}
+            {points.length > 0 && (
+              <ul class="points">
+                {points.map((b) => (
+                  <li>{b}</li>
+                ))}
+              </ul>
+            )}
+            {role.chapters && (
+              <ul class="chapters">
+                {role.chapters.map((c) => {
+                  const cPoints = pick(c.bullets, c.featured);
+                  return (
+                    <li>
+                      <p class="chapter">
+                        {c.title}
+                        <span class="chapter-years meta">
+                          <span class="sep" aria-hidden="true">
+                            {' · '}
+                          </span>
+                          {c.years}
+                        </span>
+                      </p>
+                      {cPoints.length > 0 && (
+                        <ul class="points">
+                          {cPoints.map((b) => (
+                            <li>{b}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </li>
+      );
+    })
+  }
+  <li class="row">
+    <span class="years meta">{researchTimeline.years}</span>
+    <div class="what">
+      <p class="role">
+        <span class="org">{researchTimeline.org}</span>
+        <span class="sep" aria-hidden="true"> · </span>
+        <span>{researchTimeline.role}</span>
+      </p>
+      <p class="summary"><a href="/about/#research">Research experience</a></p>
+    </div>
+  </li>
+</ol>
+
+<style>
+  .timeline,
+  .chapters {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 6.25rem 1fr;
+    gap: 0 1.25rem;
+  }
+
+  .timeline > .row + .row {
+    margin-top: 1.75rem;
+  }
+
+  .years {
+    padding-top: 0.3rem;
+    white-space: nowrap;
+  }
+
+  .role {
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .org {
+    font-weight: 550;
+  }
+
+  .summary {
+    margin: 0.25rem 0 0;
+    font-size: 1rem;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+
+  .points {
+    margin: 0.5rem 0 0;
+    padding-left: 1.1em;
+    list-style: disc;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .points li + li {
+    margin-top: 0.3rem;
+  }
+
+  .points li::marker {
+    color: var(--muted);
+  }
+
+  .chapters > li {
+    margin-top: 1rem;
+  }
+
+  .chapter {
+    margin: 0;
+    line-height: 1.4;
+    font-style: italic;
+  }
+
+  .chapter-years {
+    font-style: normal;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 34em) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+
+    .years {
+      padding-top: 0;
+    }
+  }
+</style>

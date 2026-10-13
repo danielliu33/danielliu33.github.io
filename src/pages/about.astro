@@ -1,0 +1,142 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Email from '../components/Email.astro';
+import { about, focusAreas, education, research, links, site } from '../data/profile';
+
+/** Split a paragraph into text and [text](url) links. */
+const linkPattern = /\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g;
+const parts = (paragraph: string) => {
+  const out: { text: string; href?: string }[] = [];
+  let last = 0;
+  for (const m of paragraph.matchAll(linkPattern)) {
+    if (m.index > last) out.push({ text: paragraph.slice(last, m.index) });
+    out.push({ text: m[1], href: m[2] });
+    last = m.index + m[0].length;
+  }
+  if (last < paragraph.length) out.push({ text: paragraph.slice(last) });
+  return out;
+};
+
+const description = `About ${site.name}: ${site.metaDescription.replace(`${site.name}, `, '')}`;
+---
+
+<BaseLayout title="About" description={description}>
+  <header class="page-head">
+    <h1 class="page-title">About</h1>
+  </header>
+
+  <div class="prose about">
+    {about.map((paragraph) => <p>{parts(paragraph).map((part) => (part.href ? <a href={part.href}>{part.text}</a> : part.text))}</p>)}
+  </div>
+
+  <section class="section" aria-labelledby="focus">
+    <h2 id="focus" class="section-label">What I work on</h2>
+    <ul class="focus">
+      {focusAreas.map((area) => <li>{area}</li>)}
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="education">
+    <h2 id="education" class="section-label">Education</h2>
+    <ul class="entries">
+      {
+        education.map((e) => (
+          <li class="entry">
+            <p class="item-title">{e.degree}</p>
+            <p class="meta">
+              {e.school}
+              {e.years && ` · ${e.years}`}
+            </p>
+            <p class="item-text">{e.notes}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="research">
+    <h2 id="research" class="section-label">Research experience</h2>
+    <ul class="entries">
+      {
+        research.map((r) => (
+          <li class="entry">
+            <p class="item-title">{r.title}</p>
+            <p class="meta">{r.years}</p>
+            <p class="item-text">{r.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="contact">
+    <h2 id="contact" class="section-label">Contact</h2>
+    <p class="contact">
+      <Email />
+      <span aria-hidden="true">·</span>
+      <a href={links.linkedin} rel="me">LinkedIn</a>
+      <span aria-hidden="true">·</span>
+      <a href="/resume/">Résumé</a>
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .about p:first-child {
+    font-size: 1.3125rem;
+    line-height: 1.5;
+  }
+
+  .focus {
+    margin: 0;
+    padding-left: 1.1em;
+  }
+
+  .focus li + li {
+    margin-top: 0.5rem;
+  }
+
+  .focus li::marker {
+    color: var(--muted);
+  }
+
+  .entries .entry + .entry {
+    margin-top: 1.5rem;
+  }
+
+  .item-title {
+    margin: 0 0 0.2rem;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .entry .meta {
+    margin: 0 0 0.375rem;
+  }
+
+  .item-text {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+
+  .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 0.9375rem;
+    color: var(--muted);
+  }
+
+  .contact :global(a) {
+    color: var(--ink);
+  }
+
+  .contact :global(a:hover) {
+    color: var(--accent);
+  }
+</style>

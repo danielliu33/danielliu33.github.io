@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostList from '../../../components/PostList.astro';
+import { getPosts, tagSlug, type Post } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const byTag = new Map<string, { name: string; posts: Post[] }>();
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      const slug = tagSlug(tag);
+      if (!slug) continue;
+      const group = byTag.get(slug) ?? { name: tag, posts: [] };
+      group.posts.push(post);
+      byTag.set(slug, group);
+    }
+  }
+  return [...byTag].map(([slug, group]) => ({
+    params: { tag: slug },
+    props: { name: group.name, posts: group.posts },
+  }));
+}
+
+interface Props {
+  name: string;
+  posts: Post[];
+}
+
+const { name, posts } = Astro.props;
+---
+
+<BaseLayout title={`Posts tagged “${name}”`} description={`Writing by Daniel Liu tagged “${name}”.`}>
+  <header class="page-head">
+    <p class="label"><a href="/writing/">Writing</a></p>
+    <h1 class="page-title">Tagged “{name}”</h1>
+  </header>
+  <PostList posts={posts} headingLevel={2} />
+</BaseLayout>
+
+<style>
+  .label a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .label a:hover {
+    color: var(--accent);
+  }
+</style>

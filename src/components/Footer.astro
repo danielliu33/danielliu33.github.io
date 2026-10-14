@@ -1,6 +1,5 @@
 ---
-import Email from './Email.astro';
-import { site, links } from '../data/profile';
+import { site } from '../data/profile';
 
 interface Props {
   /** Show the RSS link (only once at least one post is published). */
@@ -11,53 +10,30 @@ const { showRss = false } = Astro.props;
 ---
 
 <footer class="site-footer">
-  <div class="wrap footer-inner">
+  <div class="wrap offset">
     <p>
-      <span>© {site.copyrightYear} {site.name}</span>
+      © {site.copyrightYear} {site.name}
       {
         showRss && (
           <>
-            <span aria-hidden="true">·</span>
+            {' · '}
             <a href="/rss.xml">RSS</a>
           </>
         )
       }
-      <span aria-hidden="true">·</span>
-      <Email label="Email" />
-      <span aria-hidden="true">·</span>
-      <a href={links.linkedin} rel="me">LinkedIn</a>
     </p>
   </div>
 </footer>
 
 <style>
-  .site-footer {
-    border-top: 1px solid var(--rule);
-  }
-
-  .footer-inner {
-    padding-block: 1.75rem 2.5rem;
-  }
-
   p {
     margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.25rem 0.625rem;
-    font-family: var(--sans);
-    font-size: 0.8125rem;
+    padding-block: 0 2rem;
+    font-size: 0.875rem;
     color: var(--muted);
   }
 
-  p :global(a) {
-    color: var(--ink-2);
-    text-decoration-color: var(--accent-soft);
-    padding-block: 0.25rem;
-  }
-
-  p :global(a:hover) {
-    color: var(--accent);
-    text-decoration-color: currentColor;
+  a {
+    color: inherit;
   }
 </style>

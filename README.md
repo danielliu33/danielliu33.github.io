@@ -2,10 +2,11 @@
 
 Personal site and blog of Daniel Liu. Static [Astro](https://astro.build) site, deployed to GitHub Pages.
 
-- Home, About, Work (case studies), Writing (blog), Résumé (HTML + one-page PDF)
+- Home (short bio, links, dated lists of work, papers & patents, writing), Work (case studies), Writing (blog), CV (PDF at `/cv.pdf`)
+- Quiet academic layout: EB Garamond, black on `#f4f4f3`, one narrow column
 - RSS (`/rss.xml`), sitemap, `robots.txt`, `llms.txt`
 - Build-time KaTeX math, Shiki code highlighting (light + dark), footnotes, heading anchors, reading time, tags
-- Light and dark themes with a toggle; no client-side framework (two tiny inline scripts: theme and email)
+- Dark colors follow the system setting (no toggle); no client-side framework (one tiny inline script assembles the email link)
 
 ## Run locally
 
@@ -18,52 +19,76 @@ npm run build     # production build into dist/ (drafts excluded), then post-bui
 npm run preview   # serve dist/ locally
 ```
 
-`npm run build` ends with `scripts/check-dist.mjs`, which fails the build if anything from `drafts/` was built, if a page contains a KaTeX error (invalid TeX), or if the sitemap lists a `noindex` page.
+`npm run build` ends with `scripts/check-dist.mjs`, which fails the build if anything from `drafts/` was built, if a page contains a KaTeX error (invalid TeX), if the sitemap lists a `noindex` page, if `cv.pdf` is missing or stale (the CV content changed since it was printed), if a redirect page for an old URL is missing (or a page links to an old URL), or if a page links to a site path or `#anchor` that does not exist.
 
-URLs use trailing slashes (`/about/`). The dev server returns 404 for `/about` without the slash; GitHub Pages redirects it.
+URLs use trailing slashes (`/work/`). The dev server returns 404 for `/work` without the slash; GitHub Pages redirects it.
 
 ## Project layout
 
 ```
 src/
-  data/profile.ts        single source for name, links, experience, education, research,
-                         publications, patents, and the résumé
+  data/profile.ts        single source for name, links (Twitter), photo, bio, work and papers lists, and the CV
   content/work/          case studies (Markdown)
   content/writing/       blog posts (Markdown or MDX)
   content.config.ts      collection schemas
-  pages/                 routes (home, about, work, writing, résumé, rss.xml, robots.txt, llms.txt, 404)
-  layouts/BaseLayout.astro   <head> meta, theme script, header/footer
-  components/            header, footer, timeline, lists, obfuscated email
-  styles/global.css      design tokens (light/dark) and typography
+  lib/legacy-redirects.mjs   old URLs and where they now go
+  pages/                 routes (home, work, writing, cv, rss.xml, robots.txt, llms.txt, 404)
+  layouts/BaseLayout.astro   <head> meta, header/footer, email script
+  components/            header, footer, dated lists (work, papers, posts), CV entry, obfuscated email
+  styles/global.css      color tokens (light/dark), typography and layout
 scripts/
-  render-resume-pdf.mjs  builds and prints /resume/ to public/resume.pdf
+  render-cv-pdf.mjs      builds and prints /cv/ to public/cv.pdf
+  cv-fingerprint.mjs     hashes that tie public/cv.pdf to the CV content (cv-pdf-source.json)
   render-og-image.mjs    renders public/og-default.png (1200×630)
   render-icons.mjs       renders public/apple-touch-icon.png and public/favicon.ico from favicon.svg
-  check-dist.mjs         post-build checks (drafts, KaTeX errors, sitemap vs noindex)
-public/                  favicons, social image, résumé PDF
+  check-dist.mjs         post-build checks (drafts, KaTeX errors, sitemap vs noindex, CV PDF, old URLs, internal links)
+public/                  favicons, social image, CV PDF (and your photo, if you add one)
 ```
 
 ## Edit the profile
 
-Everything about the person lives in `src/data/profile.ts`: headline, bios, links, experience, education, research, publications, patents, and the résumé text. The home page, About page, HTML résumé and PDF all read from it, so they never disagree.
+Everything about the person lives in `src/data/profile.ts`. The home page, the `/cv/` page and the CV PDF all read from it, so they never disagree.
 
-The home page timeline shows each role's summary plus only the bullets listed in its `featured` array (indexes into `bullets`); the résumé shows every bullet. About paragraphs may contain Markdown links: `[text](https://…)`.
+- `bio`: the home-page paragraphs, one short sentence or two each. They may contain Markdown links: `[text](https://…)` or `[text](/work/…/)`.
+- `selectedWork`: the "Work" list (order and one-line text). Each `slug` is a file in `src/content/work/`; the years come from that file.
+- `papers`: the "Papers & patents" list (year, title, link, note).
+- `cv`: every section of the CV.
+- `links.linkedin`, `links.cvPdf`; the email address is split in `email` so it never appears whole in the HTML source.
 
-Conventions: career and education dates are **years only** (`2020–2026`). Use an en dash between years.
+### Twitter
 
-After changing anything the résumé shows, regenerate the PDF (see below).
+`links.twitter` is empty, so no Twitter link is shown anywhere. Set it to the full profile URL:
+
+```ts
+twitter: 'https://x.com/yourhandle',
+```
+
+That adds "Twitter" as the first item of the home-page link row (Twitter / CV / LinkedIn / Email), `x.com/yourhandle` to the CV header, the profile to the JSON-LD `sameAs`, and a `twitter:creator` tag. Pasted forms such as `https://www.x.com/yourhandle/`, `https://x.com/yourhandle?s=21` or `twitter.com/yourhandle` are accepted and shown as `https://x.com/yourhandle`; anything that is not an X profile URL fails the build. Then regenerate the CV PDF (`npm run pdf`); the build fails until you do.
+
+### Photo
+
+`site.photo` is empty, so the home page is a single column. To add a photo, put your photo at `public/photo.jpg` and set:
+
+```ts
+photo: '/photo.jpg',
+```
+
+On wide screens it sits about 180px wide to the left of the bio; on phones it stacks above the text. It is decorative (empty alt text, since the page heading already names you), and its width and height are read from the file at build time so the page does not shift while it loads. Use a JPEG, PNG or WebP file; the build fails if the file is missing or unreadable.
+
+Conventions: career and education dates are **years only** (`2020–2026`). Use an en dash between years. Blog posts show year and month only.
+
+After changing anything the CV shows, regenerate the PDF (see below).
 
 ## Edit case studies
 
-One Markdown file per case study in `src/content/work/`. The file name is the URL slug (`/work/<file-name>/`).
+One Markdown file per case study in `src/content/work/`. The file name is the URL slug (`/work/<file-name>/`). Add it to `selectedWork` in `src/data/profile.ts` too (the build fails otherwise); that list sets the order and the home-page line.
 
 ```md
 ---
 title: 'A short, specific title'
 org: 'Company — Team'
 years: '2023–2024'
-one_liner: 'One or two sentences shown on the home page and as the page lede.'
-order: 1        # position in "Selected work" (ascending)
+one_liner: 'One or two sentences shown on /work/ and as the page lede.'
 ---
 
 ## Context
@@ -92,6 +117,7 @@ draft: true
 ---
 ```
 
+- Dates show as year and month only (`2026 Oct` in lists, `October 2026` on the post).
 - `updated` is optional and shown as "Updated …".
 - `tags` must be lower-case slugs (`post-training`, not `Post training`); the build fails otherwise. Keep a small, fixed set.
 - `draft: true` is optional and keeps a committed post out of the production build.
@@ -138,21 +164,29 @@ Prefer `.md`. Use `.mdx` only when a post needs components. Builds with an `.mdx
 - Put images next to the post (or in `public/`) and reference them with standard Markdown.
 - Reading time is computed automatically.
 
-## Résumé PDF
+## CV PDF
 
 ```sh
 npm run pdf
 ```
 
-This builds the site, serves it on a free local port, prints `/resume/` with headless Chrome to `public/resume.pdf`, checks that it is exactly one Letter page with no Type 3 fonts, and rebuilds. Commit the updated `public/resume.pdf`.
+This builds the site, serves it on a free local port, prints `/cv/` with headless Chrome to `public/cv.pdf`, checks it, records which CV content it was printed from in `scripts/cv-pdf-source.json`, and rebuilds. Commit both `public/cv.pdf` and `scripts/cv-pdf-source.json`. The script fails if the PDF is more than two Letter pages, embeds a Type 3 font, or embeds any font other than static EB Garamond (a character missing from EB Garamond falls back to a system font; replace it). It currently runs to about one and a quarter pages; page 2 carries a "Daniel Liu · 2 / 2" footer.
 
-Needs Google Chrome (set `CHROME_PATH` for another Chrome/Chromium binary). `pdfinfo` and `pdffonts` (poppler) are used for the checks when available. If the page check fails, tighten the `@media print` styles in `src/pages/resume.astro`.
+The post-build check compares the built `/cv/` page (its text, links and email parts, not its styling) with `scripts/cv-pdf-source.json`, so a change to the CV data or to `links.twitter` without `npm run pdf` fails the build, locally and in CI. After a print-style-only change, run `npm run pdf` anyway.
 
-The print styles use static Newsreader (`@fontsource/newsreader`) and Arial instead of the site's variable fonts. Chrome embeds variable fonts as Type 3, which copy-pastes as garbled text in macOS Preview and some applicant-tracking systems.
+Needs Google Chrome (set `CHROME_PATH` for another Chrome/Chromium binary) and poppler (`brew install poppler`) for `pdfinfo` and `pdffonts`. If the page check fails, tighten the `@media print` styles in `src/pages/cv.astro`.
+
+`/cv/` is the print source: `noindex`, not in the nav or the sitemap. The home page's CV link opens `/cv.pdf` in the browser; the Download link on `/cv/` saves it as `Daniel-Liu-CV.pdf`.
+
+The site uses static EB Garamond (`@fontsource/eb-garamond`, weights 400 and 500 plus italic), not a variable font: Chrome embeds variable fonts as Type 3, which copy-pastes as garbled text in macOS Preview and some applicant-tracking systems.
+
+## Old URLs
+
+Links shared since launch keep working. `src/lib/legacy-redirects.mjs` lists them: `/about/` goes to the home page and the old résumé paths go to `/cv.pdf`. Page paths get static redirect pages (meta refresh, `rel=canonical`, `noindex`, left out of the sitemap); a missing file path is forwarded by the 404 page.
 
 ## Social image
 
-`public/og-default.png` is the default Open Graph / Twitter card. Regenerate it after changing the name or headline (edit the strings at the top of the script first):
+`public/og-default.png` is the default Open Graph / Twitter card (EB Garamond on `#f4f4f3`, like the site). Regenerate it after changing the name or headline (edit the strings at the top of the script first):
 
 ```sh
 npm run og

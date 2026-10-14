@@ -1,12 +1,14 @@
 import type { APIContext } from 'astro';
-import { getCollection } from 'astro:content';
-import { site, links } from '../data/profile';
+import { site, links, twitter, bio, papers } from '../data/profile';
+import { inlinePlain } from '../lib/inline-links';
 import { getPosts, postHref } from '../lib/posts';
+import { getWork, workHref } from '../lib/work';
 
 /** Plain-text overview for people who paste this site into an LLM (https://llmstxt.org). */
 export async function GET(context: APIContext) {
-  const abs = (path: string) => new URL(path, context.site).href;
-  const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+  const base = context.site ?? site.url;
+  const abs = (path: string) => new URL(path, base).href;
+  const work = await getWork();
   const posts = await getPosts();
 
   const lines = [
@@ -14,17 +16,20 @@ export async function GET(context: APIContext) {
     '',
     `> ${site.metaDescription}`,
     '',
-    site.shortBio,
+    ...bio.map((p) => inlinePlain(p, base)).flatMap((p) => [p, '']),
+    '## Links',
     '',
-    '## Pages',
-    '',
-    `- [About](${abs('/about/')}): background, focus areas, education and research`,
-    `- [Résumé](${abs('/resume/')}): one-page résumé (PDF: ${abs(links.resumePdf)})`,
+    `- [CV (PDF)](${abs(links.cvPdf)})`,
     `- [LinkedIn](${links.linkedin})`,
+    ...(twitter ? [`- [Twitter](${twitter.url})`] : []),
     '',
-    '## Selected work',
+    '## Work',
     '',
-    ...work.map((w) => `- [${w.data.title}](${abs(`/work/${w.id}/`)}): ${w.data.one_liner}`),
+    ...work.map((w) => `- [${w.data.title}](${abs(workHref(w))}) (${w.data.years}): ${w.data.one_liner}`),
+    '',
+    '## Papers & patents',
+    '',
+    ...papers.map((p) => `- [${p.title}](${p.url}) (${p.year}): ${p.note}`),
   ];
 
   if (posts.length > 0) {

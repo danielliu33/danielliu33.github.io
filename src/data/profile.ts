@@ -1,25 +1,36 @@
 /**
- * Single source of truth for the site: identity, links, experience, education,
- * research, publications, patents and the résumé. The home page, About page,
- * HTML résumé and résumé PDF all read from this file, so they never disagree.
+ * Single source of truth for the site: identity, links, the home-page bio,
+ * the work and papers lists, and the CV. The home page, the /cv/ page and the
+ * CV PDF (public/cv.pdf) all read from this file, so they never disagree.
  *
  * Career and education dates are years only.
  */
 
-export const site = {
+export const site: {
+  name: string;
+  url: string;
+  headline: string;
+  metaDescription: string;
+  location: string;
+  copyrightYear: number;
+  photo: string;
+} = {
   name: 'Daniel Liu',
   url: 'https://danielliu33.github.io',
+  /** First line of the bio; also the alt text of the social image. */
   headline: 'I build AI agents, and the evaluations that decide whether they ship.',
-  subhead:
-    'Founding AI researcher on Meta AI for Business. I work on post-training, evaluation, and agent systems, from research to production.',
-  shortBio:
-    "I’m Daniel Liu. I spent more than five years at Meta building AI for advertisers: ads ranking, recommendations for small businesses, and finally agents, as a founding AI researcher on Meta AI for Business. In 2026 I founded an AI-native marketing startup and built its multi-agent platform from zero. I work on post-training, evaluation, and agent systems.",
   metaDescription:
-    'Daniel Liu, founding AI researcher on Meta AI for Business. Post-training, evaluation, and agent systems, from research to production.',
-  focusLine: 'Focused on post-training, evaluation, and agent systems.',
+    'Daniel Liu builds AI agents, and the evaluations that decide whether they ship. Previously a founding AI researcher on Meta AI for Business.',
   location: 'San Francisco Bay Area',
   copyrightYear: 2026,
-} as const;
+  /**
+   * Home-page photo. Empty: the home page is a single column. To show one, put
+   * the file at public/photo.jpg and set photo: '/photo.jpg' (JPEG, PNG or
+   * WebP; its size is read at build time). It is shown about 180px wide to the
+   * left of the bio (above it on phones).
+   */
+  photo: '',
+};
 
 /** Email is split so the address never appears whole in the HTML source. */
 export const email = {
@@ -29,313 +40,229 @@ export const email = {
   fallback: 'liuchen9494 [at] gmail [dot] com',
 } as const;
 
-export const links = {
+export const links: Record<'linkedin' | 'linkedinLabel' | 'twitter' | 'cvPdf' | 'cvFileName', string> = {
   linkedin: 'https://www.linkedin.com/in/danielliu88',
   linkedinLabel: 'linkedin.com/in/danielliu88',
-  resumePdf: '/resume.pdf',
-} as const;
-
-/** About page paragraphs. Inline links use Markdown syntax: [text](https://…). */
-export const about: string[] = [
-  'I build AI systems that make real decisions for real businesses, and the evaluations that tell you whether to trust them.',
-  'I spent more than five years at Meta (2020–2026) and went from Software Engineer to Staff. I started on Messenger Kids ML, moved to Instagram ads ranking, and then led ranking and recommendation work for small-business advertisers. That SMB ads work drove $100M+ in ad platform revenue. My last role at Meta was as a founding AI researcher on Meta AI for Business, Meta’s AI assistant for advertisers. I led its product direction and core agent-system design as it grew into a 100+ person initiative spanning four Meta organizations.',
-  'That work left me with one conviction. Models are very good at the intelligence work: plausible recommendations, scenarios, answers. What they can’t do on their own is judgment: knowing which answer fits this business, with this history, chasing these goals. [Sequoia frames this as intelligence versus judgment](https://www.sequoiacap.com/article/services-the-new-software/), and I saw the split from the inside. As models get better, judgment becomes the scarce input. The systems worth building know when to hand a decision back to a person.',
-  'In 2026 I founded an AI-native marketing startup to test that idea: a multi-agent platform I built from zero, with human strategists making the calls. As founder I owned engineering and go-to-market, and won multiple paid client engagements.',
-  'Before Meta, I did ML research at UIUC: controllable outfit generation with Prof. David Forsyth, and clinical prediction with the DEPEND group in collaboration with Mayo Clinic.',
-  'My focus is post-training, evaluation, and agent systems.',
-];
-
-export const focusAreas: string[] = [
-  'AI agents in production: planning, tool use, memory, and multi-agent orchestration',
-  'Post-training and evaluation: deciding what “good” means when there’s no benchmark',
-  'Human-in-the-loop design: when an agent should act and when a person should decide',
-  'Ranking and recommendation systems',
-  'AI for advertisers and small businesses',
-];
-
-export interface Chapter {
-  title: string;
-  years: string;
-  bullets: string[];
-  /** Indexes of `bullets` shown on the home page timeline (the résumé shows them all). */
-  featured?: number[];
-}
-
-export interface Role {
-  org: string;
-  role: string;
-  years: string;
-  location: string;
-  summary?: string;
-  bullets: string[];
-  /** Indexes of `bullets` shown on the home page timeline (the résumé shows them all). */
-  featured?: number[];
-  chapters?: Chapter[];
-}
-
-export const experience: Role[] = [
-  {
-    org: 'AI-native marketing startup',
-    role: 'Founder',
-    years: '2026',
-    location: 'San Francisco, CA',
-    summary:
-      'Founded a startup that paired human strategists with AI-agent workflows for campaign analysis, execution, and reporting.',
-    bullets: [
-      'Owned engineering and go-to-market as founder, and won multiple paid client engagements.',
-      'Built the multi-agent platform from zero: a main agent that delegated to sub-agents, long-running tool use, persistent memory, and a sandboxed execution service.',
-      'Split the agent into two modes. Analysis could only read. Execution showed a plan and waited for a person’s approval before changing anything in an ad account.',
-      'Connected Meta, Google, LinkedIn, TikTok, and Amazon ad accounts through OAuth. How far the agent could act on each depended on that platform’s ads API.',
-      'Shipped scheduled proactive automations, cross-platform reporting on live data, and an in-agent Python analytics sandbox.',
-    ],
-    featured: [0],
-  },
-  {
-    org: 'Meta',
-    role: 'Staff Software Engineer, ML/AI (Software Engineer → Senior → Staff)',
-    years: '2020–2026',
-    location: 'Menlo Park, CA',
-    summary:
-      'More than five years building ML and AI systems, from Messenger Kids ML to ads ranking and recommendation, and then to LLM agents for advertisers.',
-    bullets: [
-      'Led SMB ads work that drove $100M+ in ad platform revenue.',
-      'Co-inventor on a published U.S. patent application for LLM-assisted ad creation for small businesses.',
-    ],
-    featured: [0, 1],
-    chapters: [
-      {
-        title: 'Meta AI for Business — Founding AI Researcher',
-        years: '2024–2026',
-        bullets: [
-          'Founding AI researcher on Meta AI for Business, Meta’s AI assistant that helps advertisers diagnose campaign issues, optimize performance, and create campaigns through natural conversation.',
-          'Led product direction and core agent-system design for a 100+ person initiative spanning four Meta organizations, working closely with domain experts.',
-          'Built the post-training and evaluation loop end to end: SFT, DPO and GRPO, human and LLM-judge evals, and launch gates.',
-          'Designed production agent infrastructure for multi-step planning, tool use, context management, and multi-agent orchestration.',
-        ],
-        featured: [1, 2],
-      },
-      {
-        title: 'SMB Ads ML — Tech Lead',
-        years: '2023–2024',
-        bullets: [
-          'Tech lead on Meta’s SMB ads ML team, working on ad delivery optimization, recommendation systems, and budget automation for small and mid-sized advertisers.',
-          'Shipped Meta’s first ML-powered personalized budget recommendation system for SMB advertisers.',
-          'Built feed ranking for small-business surfaces end to end.',
-          'Led a workstream of about 10 engineers and 20+ cross-functional partners.',
-        ],
-        featured: [1],
-      },
-      {
-        title: 'Instagram Ads Ranking & Messenger Kids ML — ML Engineer',
-        years: '2020–2023',
-        bullets: [
-          'Built computer-vision super-resolution for ad images and video, aimed at helping small businesses get better creative without expensive production.',
-          'Shipped ML into ads delivery and ranking, including video-template generation, ranking-signal work, and reinforcement-learning-based ad-format personalization.',
-          'Built the first ML integrity model for real-time age detection on Messenger Kids, and redesigned the connection-ranking models that help kids connect with friends.',
-        ],
-      },
-    ],
-  },
-  {
-    org: 'Meta',
-    role: 'Software Engineer Intern, Speech',
-    years: '2020',
-    location: 'Menlo Park, CA',
-    bullets: [
-      'Contributed PyTorch scripting modules (Python and C++) to the open-source Fairseq toolkit.',
-      'Built sequence-generation workflows and new text-diversity metrics.',
-    ],
-  },
-  {
-    org: 'Google',
-    role: 'Software Engineer Intern, Ads Quality',
-    years: '2019',
-    location: 'Mountain View, CA',
-    bullets: [
-      'Applied autoencoders and adversarial autoencoders to ads spam detection.',
-      'Built pipelines to filter fraudulent URL domains out of ad traffic.',
-    ],
-  },
-];
-
-/** One row in the home-page timeline for the research years before Meta. */
-export const researchTimeline = {
-  org: 'UIUC',
-  role: 'Research Assistant (Prof. David Forsyth; DEPEND group, with Mayo Clinic)',
-  years: '2017–2020',
+  /**
+   * Full profile URL, e.g. 'https://x.com/yourhandle'. Empty hides every
+   * Twitter link (home page, CV, JSON-LD, social meta).
+   */
+  twitter: '',
+  /** The CV PDF, written by `npm run pdf`. */
+  cvPdf: '/cv.pdf',
+  cvFileName: 'Daniel-Liu-CV.pdf',
 };
 
-export interface Publication {
-  authors: string;
-  title: string;
-  venue: string;
-  year: string;
-  url: string;
+const twitterPattern = /^https:\/\/(?:x|twitter)\.com\/([A-Za-z0-9_]{1,15})$/;
+
+/**
+ * Accepts the forms a share sheet or address bar produces
+ * ('https://www.x.com/handle/', 'https://x.com/handle?s=21', 'x.com/handle')
+ * and reduces them to 'https://x.com/handle'.
+ */
+function normalizeTwitter(raw: string): string {
+  let url = raw.trim().replace(/[?#].*$/, '').replace(/\/$/, '');
+  if (!/^https?:\/\//.test(url)) url = `https://${url}`;
+  return url.replace(/^http:/, 'https:').replace(/^https:\/\/www\./, 'https://');
 }
 
-export const publications: Publication[] = [
-  {
-    authors: 'Kedan Li, Chen Liu, David Forsyth',
-    title: 'Coherent and Controllable Outfit Generation',
-    venue: 'arXiv preprint arXiv:1906.07273',
-    year: '2019',
-    url: 'https://arxiv.org/abs/1906.07273',
-  },
+/** Twitter/X profile, or null when links.twitter is empty. */
+export const twitter = (() => {
+  if (!links.twitter.trim()) return null;
+  const m = normalizeTwitter(links.twitter).match(twitterPattern);
+  if (!m) {
+    throw new Error(`profile.ts: links.twitter must look like https://x.com/handle (got "${links.twitter}")`);
+  }
+  return { url: `https://x.com/${m[1]}`, handle: `@${m[1]}`, label: `x.com/${m[1]}` };
+})();
+
+/**
+ * Home-page bio: one short paragraph each. Inline links use Markdown syntax,
+ * [text](https://…) or [text](/path/).
+ */
+export const bio: string[] = [
+  'I build AI agents, and the evaluations that decide whether they ship.',
+  'In 2026, I founded an AI-native marketing startup and built its [multi-agent platform](/work/multi-agent-marketing-platform/) from zero.',
+  'Before that, from 2020 to 2026, I was at Meta, most recently as a founding AI researcher on [Meta AI for Business](/work/meta-ai-for-business/), where I worked on post-training, evaluation, and agents.',
+  'I led product direction and core agent-system design for Meta’s AI assistant for advertisers, which grew into a 100+ person initiative spanning four Meta organizations.',
+  'Earlier at Meta, I led ranking and recommendation work for small-business advertisers, including Meta’s first ML-powered personalized [budget recommendations](/work/smb-ads-budget-recommendations/). That work drove $100M+ in ad platform revenue.',
+  'I studied electrical and computer engineering at UIUC, where I did ML research with [David Forsyth](https://siebelschool.illinois.edu/about/people/all-faculty/daf) on [controllable outfit generation](https://arxiv.org/abs/1906.07273).',
 ];
 
-export interface Patent {
-  title: string;
-  detail: string;
-  url: string;
-}
+/**
+ * "Work" on the home page and /work/, in this order. `slug` is a file in
+ * src/content/work/ (its years come from that file's front matter).
+ */
+export const selectedWork: { slug: string; text: string }[] = [
+  { slug: 'multi-agent-marketing-platform', text: 'Built a multi-agent marketing platform from zero.' },
+  { slug: 'meta-ai-for-business', text: 'Defined “good” for an AI assistant that advises advertisers.' },
+  { slug: 'smb-ads-budget-recommendations', text: 'Helped small advertisers decide how much to spend.' },
+];
 
-export const patents: Patent[] = [
+/** "Papers & patents" on the home page and /work/. Years only. */
+export const papers: { year: string; title: string; url: string; note: string }[] = [
   {
-    title: 'Methods and Systems to Improve Post Opportunities',
-    detail:
-      'Co-inventor (as Chen Liu). U.S. Patent Application No. 18/890,540, published as US 2025/0148501 A1. Uses large language models to help small businesses create and improve ads: scoring and revising a post, drafting copy, and suggesting budget and audience. Claims priority to a provisional application titled “Automation to Generate and Proactively Propose Advertising Opportunities.”',
+    year: '2025',
+    title: 'Methods and systems to improve post opportunities',
     url: 'https://patents.google.com/patent/US20250148501A1/en',
+    note: 'U.S. patent application, co-inventor (as Chen Liu)',
+  },
+  {
+    year: '2019',
+    title: 'Coherent and controllable outfit generation',
+    url: 'https://arxiv.org/abs/1906.07273',
+    note: 'arXiv preprint, with Kedan Li and David Forsyth',
   },
 ];
 
-export interface Education {
-  school: string;
-  degree: string;
+/* ------------------------------------------------------------------------ */
+/* CV (HTML print source at /cv/, PDF at /cv.pdf via `npm run pdf`)          */
+/* ------------------------------------------------------------------------ */
+
+export interface CvEntry {
+  heading: string;
+  /** Link for the heading (publications, patents). */
+  url?: string;
+  subheading?: string;
   years?: string;
-  notes: string;
-}
-
-export const education: Education[] = [
-  {
-    school: 'University of Illinois Urbana-Champaign',
-    degree: 'M.S., Computer Engineering',
-    years: '2020',
-    notes: 'GPA 3.87/4.0',
-  },
-  {
-    school: 'University of Illinois Urbana-Champaign',
-    degree: 'B.S., Electrical Engineering',
-    notes: 'Graduated with Highest Honors; James Scholar; Dean’s List',
-  },
-];
-
-export interface Research {
-  title: string;
-  years: string;
-  text: string;
-}
-
-export const research: Research[] = [
-  {
-    title: 'Research Assistant, UIUC — advised by Prof. David Forsyth',
-    years: '2018–2020',
-    text: 'Built deep CNNs in PyTorch for fashion compatibility and controllable outfit generation. Assembled a 360K-outfit dataset, shipped an iOS app for style-based search, and used DeepLab for image segmentation. The work led to an arXiv preprint.',
-  },
-  {
-    title: 'Research Assistant, UIUC DEPEND Group (Prof. R.K. Iyer), in collaboration with Mayo Clinic',
-    years: '2017–2019',
-    text: 'Built deep learning models to predict early breast-cancer recurrence and Alzheimer’s progression from longitudinal clinical data, and ran unsupervised analysis of metabolomics data.',
-  },
-  {
-    title: 'ML Research Intern, Mayo Clinic',
-    years: '2018',
-    text: 'Built reinforcement-learning models for clinical decision-making, validated in simulation.',
-  },
-];
-
-/* ------------------------------------------------------------------------ */
-/* Résumé (HTML at /resume/ and the one-page PDF at /resume.pdf)             */
-/* ------------------------------------------------------------------------ */
-
-/** A line with an optional bold lead, e.g. "**Founder** — AI-native …". */
-export interface LeadLine {
-  lead: string;
-  rest: string;
-}
-
-export interface ResumeGroup {
-  title: string;
-  bullets: string[];
-}
-
-export interface ResumeEntry {
-  heading: LeadLine;
   bullets?: string[];
-  groups?: ResumeGroup[];
+  /** Roles nested under one employer (shown indented, without repeating it). */
+  chapters?: CvEntry[];
 }
 
-export const resume = {
+export interface CvSection {
+  title: string;
+  /** 'inline' renders each entry as one line: "Heading: subheading". */
+  layout?: 'inline';
+  entries: CvEntry[];
+}
+
+export const cv: { summary: string; sections: CvSection[] } = {
   summary:
     'AI researcher and engineer working on post-training, evaluation, and agent systems, from research to production.',
-  experience: [
+  sections: [
     {
-      heading: { lead: 'Founder', rest: 'AI-native marketing startup · San Francisco, CA · 2026' },
-      bullets: [
-        'Founded a startup that paired human strategists with AI-agent workflows for campaign analysis, execution, and reporting. Owned engineering and go-to-market; won multiple paid client engagements.',
-        'Built the multi-agent platform from zero: main-agent / sub-agent orchestration, long-running tool use, persistent memory, a sandboxed execution service, and an in-agent Python analytics sandbox.',
-        'Designed a read-only analysis mode and an approval-gated execution mode that showed a plan before changing any ad account. Connected Meta, Google, LinkedIn, TikTok, and Amazon through OAuth.',
+      title: 'Experience',
+      entries: [
+        {
+          heading: 'AI-native marketing startup',
+          subheading: 'Founder',
+          years: '2026',
+          bullets: [
+            'Built a multi-agent marketing platform from zero. Owned engineering and go-to-market, and won multiple paid client engagements.',
+            'Designed two modes: read-only analysis, and execution that waited for a person’s approval before changing anything in an ad account.',
+            'Connected Meta, Google, LinkedIn, TikTok, and Amazon ad accounts through OAuth.',
+          ],
+        },
+        {
+          heading: 'Meta',
+          subheading: 'Staff Software Engineer, ML/AI (promoted from Software Engineer to Senior to Staff)',
+          years: '2020–2026',
+          bullets: [
+            'More than five years building ML and AI systems, from Messenger Kids ML to ads ranking and recommendation, and then to LLM agents for advertisers.',
+          ],
+          chapters: [
+            {
+              heading: 'Meta AI for Business — Founding AI Researcher',
+              years: '2024–2026',
+              bullets: [
+                'Founding AI researcher on Meta’s AI assistant for advertisers.',
+                'Led product direction and core agent-system design for a 100+ person initiative spanning four Meta organizations.',
+                'Built the post-training and evaluation loop end to end: SFT, DPO and GRPO, human and LLM-judge evals, and launch gates.',
+              ],
+            },
+            {
+              heading: 'SMB Ads ML — Tech Lead',
+              years: '2023–2024',
+              bullets: [
+                'Tech lead on ad delivery optimization and recommendation systems for small and mid-sized advertisers.',
+                'Shipped Meta’s first ML-powered personalized budget recommendation system for SMB advertisers.',
+                'Led SMB ads work that drove $100M+ in ad platform revenue.',
+              ],
+            },
+            {
+              heading: 'Instagram Ads Ranking & Messenger Kids ML — ML Engineer',
+              years: '2020–2023',
+              bullets: ['Shipped ML into Instagram ads ranking and delivery.', 'Started at Meta on Messenger Kids ML.'],
+            },
+          ],
+        },
+        {
+          heading: 'Meta',
+          subheading: 'Software Engineer Intern, Speech',
+          years: '2020',
+          bullets: ['Contributed to the open-source Fairseq toolkit.'],
+        },
+        {
+          heading: 'Google',
+          subheading: 'Software Engineer Intern, Ads Quality',
+          years: '2019',
+          bullets: ['Worked on ML for ads spam detection.'],
+        },
       ],
     },
     {
-      heading: {
-        lead: 'Meta',
-        rest: 'Staff Software Engineer, ML/AI (Software Engineer → Senior → Staff) · Menlo Park, CA · 2020–2026',
-      },
-      groups: [
+      title: 'Education',
+      entries: [
         {
-          title: 'Meta AI for Business — Founding AI Researcher · 2024–2026',
+          heading: 'University of Illinois Urbana-Champaign',
+          years: '2020',
           bullets: [
-            'Led product direction and core agent-system design for Meta’s AI assistant for advertisers, a 100+ person initiative spanning four Meta organizations.',
-            'Built the post-training and evaluation loop end to end: SFT, DPO and GRPO, human and LLM-judge evals, and launch gates.',
-            'Designed production agent infrastructure for multi-step planning, tool use, context management, and multi-agent orchestration.',
-          ],
-        },
-        {
-          title: 'SMB Ads ML — Tech Lead · 2023–2024',
-          bullets: [
-            'Tech lead for ad delivery, recommendation, and budget-automation systems for small and mid-sized advertisers. Led SMB ads work that drove $100M+ in ad platform revenue.',
-            'Shipped Meta’s first ML-powered personalized budget recommendation system for SMB advertisers. Built feed ranking for small-business surfaces end to end.',
-            'Led a workstream of about 10 engineers and 20+ cross-functional partners.',
-          ],
-        },
-        {
-          title: 'Instagram Ads Ranking & Messenger Kids ML — ML Engineer · 2020–2023',
-          bullets: [
-            'Built computer-vision super-resolution for ad images and video, and reinforcement-learning-based ad-format personalization in ads ranking.',
-            'Built the first ML integrity model for real-time age detection on Messenger Kids, and redesigned the app’s connection-ranking models.',
+            'M.S., Computer Engineering · GPA 3.87/4.0',
+            'B.S., Electrical Engineering · Highest Honors · James Scholar · Dean’s List',
           ],
         },
       ],
     },
-  ] as ResumeEntry[],
-  internships: {
-    lead: 'Internships',
-    rest: 'Meta, Speech (2020): PyTorch scripting modules for the open-source Fairseq toolkit. Google, Ads Quality (2019): autoencoder-based ads spam detection.',
-  } as LeadLine,
-  education: {
-    heading: {
-      lead: 'University of Illinois Urbana-Champaign',
-      rest: 'M.S. Computer Engineering (GPA 3.87/4.0), 2020 · B.S. Electrical Engineering, Highest Honors, James Scholar, Dean’s List',
-    } as LeadLine,
-    bullets: [
-      'Research: controllable outfit generation with Prof. David Forsyth (2018–2020); clinical prediction with the DEPEND group and Mayo Clinic (2017–2019).',
-    ],
-  },
-  publications: [
     {
-      before: 'Kedan Li, Chen Liu, David Forsyth. “Coherent and Controllable Outfit Generation.” ',
-      linkText: 'arXiv:1906.07273',
-      url: 'https://arxiv.org/abs/1906.07273',
-      after: ', 2019.',
+      title: 'Research Experience',
+      entries: [
+        {
+          heading: 'UIUC',
+          subheading: 'Research Assistant, advised by Prof. David Forsyth',
+          years: '2018–2020',
+          bullets: [
+            'Deep learning for fashion compatibility and controllable outfit generation, which led to an arXiv preprint.',
+          ],
+        },
+        {
+          heading: 'UIUC',
+          subheading: 'Research Assistant, DEPEND Group (Prof. R.K. Iyer), in collaboration with Mayo Clinic',
+          years: '2017–2019',
+          bullets: ['Deep learning for clinical outcome prediction from longitudinal patient data.'],
+        },
+      ],
     },
     {
-      before:
-        '“Methods and Systems to Improve Post Opportunities.” U.S. Patent Application No. 18/890,540, published as ',
-      linkText: 'US 2025/0148501 A1',
-      url: 'https://patents.google.com/patent/US20250148501A1/en',
-      after: '. Co-inventor (as Chen Liu).',
+      title: 'Publications & patents',
+      entries: [
+        {
+          heading: 'Methods and Systems to Improve Post Opportunities',
+          url: 'https://patents.google.com/patent/US20250148501A1/en',
+          subheading: 'U.S. Patent Application Publication US 2025/0148501 A1 · co-inventor (as Chen Liu)',
+          years: '2025',
+          bullets: ['Uses large language models to help small businesses create and improve ads.'],
+        },
+        {
+          heading: 'Coherent and Controllable Outfit Generation',
+          url: 'https://arxiv.org/abs/1906.07273',
+          subheading: 'Kedan Li, Chen Liu, David Forsyth · arXiv preprint arXiv:1906.07273',
+          years: '2019',
+        },
+      ],
+    },
+    {
+      title: 'Skills',
+      layout: 'inline',
+      entries: [
+        { heading: 'Languages', subheading: 'Python, C++, SQL, TypeScript' },
+        {
+          heading: 'Machine learning',
+          subheading:
+            'PyTorch · post-training (SFT, DPO, GRPO) · evaluation design (human and LLM-judge evals) · LLM agents and multi-agent orchestration · ranking and recommender systems · reinforcement learning · computer vision',
+        },
+        { heading: 'Infrastructure', subheading: 'Spark, Docker, Kubernetes, FastAPI, AWS' },
+      ],
     },
   ],
-  skills:
-    'Python, C++, SQL, TypeScript · PyTorch · Post-training (SFT, DPO, GRPO) · Evaluation design (human and LLM-judge) · LLM agents and multi-agent orchestration · Ranking and recommender systems · Reinforcement learning · Computer vision · Spark, Docker, Kubernetes, FastAPI, AWS',
 };

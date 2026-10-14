@@ -1,0 +1,20 @@
+---
+/** "Papers & patents": year | title link. Note. */
+import { papers } from '../data/profile';
+
+/** Splits a note so hyphenated words ("co-inventor") can be kept on one line. */
+const noteParts = (note: string) => note.split(/(\S+-\S+)/).filter(Boolean);
+---
+
+<ul class="dated">
+  {
+    papers.map((p) => (
+      <li>
+        <span class="date">{p.year}</span>
+        <span>
+          <a class="title" href={p.url}>{p.title}</a>. <span class="note">{noteParts(p.note).map((part) => (/^\S+-\S+$/.test(part) ? <span class="nobr">{part}</span> : part))}.</span>
+        </span>
+      </li>
+    ))
+  }
+</ul>

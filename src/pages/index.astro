@@ -1,15 +1,26 @@
 ---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Email from '../components/Email.astro';
 import WorkList from '../components/WorkList.astro';
-import Timeline from '../components/Timeline.astro';
-import Publications from '../components/Publications.astro';
+import PaperList from '../components/PaperList.astro';
 import PostList from '../components/PostList.astro';
-import { site, links } from '../data/profile';
+import { site, links, twitter, bio } from '../data/profile';
+import { inlineParts } from '../lib/inline-links';
+import { imageSize } from '../lib/image-size';
 import { getPosts } from '../lib/posts';
 
 const posts = await getPosts();
-const latest = posts.slice(0, 5);
+const latest = posts.slice(0, 8);
+
+const photo = site.photo || null;
+const photoFile = photo ? join(process.cwd(), 'public', photo) : null;
+if (photoFile && !existsSync(photoFile)) {
+  throw new Error(`site.photo is "${photo}" but public${photo} does not exist.`);
+}
+// Real dimensions, so the bio does not shift down while the photo loads.
+const photoSize = photoFile ? imageSize(photoFile) : null;
 
 const person = {
   '@context': 'https://schema.org',
@@ -17,35 +28,70 @@ const person = {
   name: site.name,
   url: site.url + '/',
   description: site.metaDescription,
-  sameAs: [links.linkedin],
+  ...(photo ? { image: new URL(photo, site.url).href } : {}),
+  sameAs: [links.linkedin, ...(twitter ? [twitter.url] : [])],
   knowsAbout: ['Post-training', 'Evaluation', 'AI agents', 'Ranking and recommendation systems'],
   alumniOf: { '@type': 'CollegeOrUniversity', name: 'University of Illinois Urbana-Champaign' },
 };
 ---
 
 <BaseLayout jsonLd={person}>
-  <section class="hero" aria-labelledby="name">
-    <h1 id="name" class="name">{site.name}</h1>
-    <p class="headline">{site.headline}</p>
-    <p class="subhead">{site.subhead}</p>
-    <p class="contact">
-      <Email label="Email" />
-      <span aria-hidden="true">·</span>
-      <a href={links.linkedin} rel="me">LinkedIn</a>
-      <span aria-hidden="true">·</span>
-      <a href={links.resumePdf} download={`${site.name.replace(/\s+/g, '-')}-Resume.pdf`}>Résumé (PDF)</a>
-    </p>
-  </section>
+  <h1 class="sr-only">{site.name}</h1>
+
+  <div class:list={['intro', { 'has-photo': photo }]}>
+    {
+      photo && photoSize && (
+        <img
+          class="photo"
+          src={photo}
+          alt=""
+          width={photoSize.width}
+          height={photoSize.height}
+          fetchpriority="high"
+          decoding="async"
+        />
+      )
+    }
+    <div class="bio">
+      {
+        bio.map((paragraph) => (
+          <p>{inlineParts(paragraph).map((part) => (part.href ? <a href={part.href}>{part.text}</a> : part.text))}</p>
+        ))
+      }
+      <p class="links">
+        {
+          twitter && (
+            <>
+              <a href={twitter.url} rel="me">
+                Twitter
+              </a>
+              <span class="slash" aria-hidden="true"> / </span>
+            </>
+          )
+        }
+        <a href={links.cvPdf}>CV</a>
+        <span class="slash" aria-hidden="true"> / </span>
+        <a href={links.linkedin} rel="me">LinkedIn</a>
+        <span class="slash" aria-hidden="true"> / </span>
+        <Email label="Email" />
+      </p>
+    </div>
+  </div>
 
   <section class="section" aria-labelledby="work">
-    <h2 id="work" class="section-label">Selected work</h2>
+    <h2 id="work" class="section-title">Work</h2>
     <WorkList />
+  </section>
+
+  <section class="section" aria-labelledby="papers">
+    <h2 id="papers" class="section-title">Papers &amp; patents</h2>
+    <PaperList />
   </section>
 
   {
     latest.length > 0 && (
       <section class="section" aria-labelledby="writing">
-        <h2 id="writing" class="section-label">Writing</h2>
+        <h2 id="writing" class="section-title">Writing</h2>
         <PostList posts={latest} />
         {posts.length > latest.length && (
           <p class="section-more">
@@ -55,72 +101,56 @@ const person = {
       </section>
     )
   }
-
-  <section class="section" aria-labelledby="experience">
-    <h2 id="experience" class="section-label">Experience</h2>
-    <Timeline />
-    <p class="section-more"><a href="/resume/">Full résumé</a></p>
-  </section>
-
-  <section class="section" aria-labelledby="publications">
-    <h2 id="publications" class="section-label">Publications &amp; patent</h2>
-    <Publications />
-  </section>
 </BaseLayout>
 
 <style>
-  .hero {
-    padding-top: 1.5rem;
+  .bio p {
+    margin: 0 0 0.6em;
   }
 
-  .name {
-    font-size: clamp(2.375rem, 1.9rem + 2vw, 3.125rem);
-    font-weight: 500;
-    letter-spacing: -0.018em;
-    line-height: 1.05;
-    margin: 0 0 1.125rem;
+  .bio .links {
+    margin: 1.1em 0 0;
   }
 
-  .headline {
-    font-family: var(--serif);
-    font-size: clamp(1.5rem, 1.22rem + 1.2vw, 1.9375rem);
-    line-height: 1.28;
-    font-weight: 400;
-    letter-spacing: -0.006em;
-    color: var(--ink);
-    margin: 0 0 1.25rem;
-    text-wrap: balance;
+  /* Larger tap targets on phones without changing the line height. */
+  .bio .links a {
+    padding-block: 0.35rem;
   }
 
-  .subhead {
-    font-size: 1.1875rem;
-    line-height: 1.55;
-    color: var(--ink-2);
-    margin: 0 0 1.75rem;
-    max-width: 36rem;
-  }
-
-  .contact {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 0.75rem;
-    margin: 0;
-    font-family: var(--sans);
-    font-size: 0.9375rem;
+  .slash {
     color: var(--muted);
   }
 
-  .contact :global(a) {
-    color: var(--ink);
+  .photo {
+    display: block;
+    width: 9rem;
+    height: auto;
+    margin: 0 0 1.25rem;
   }
 
-  .contact :global(a:hover) {
-    color: var(--accent);
+  @media (min-width: 40em) {
+    .intro.has-photo {
+      display: grid;
+      grid-template-columns: 9rem minmax(0, 1fr);
+      column-gap: 1.75rem;
+      align-items: start;
+    }
+
+    .intro.has-photo .photo {
+      margin: 0.3em 0 0;
+    }
   }
 
-  @media (max-width: 40em) {
-    .subhead {
-      font-size: 1.0625rem;
+  /* Wide screens: the photo moves into the empty rail left of the text column. */
+  @media (min-width: 60em) {
+    .intro.has-photo {
+      grid-template-columns: var(--rail) minmax(0, 1fr);
+      column-gap: var(--rail-gap);
+      margin-left: calc(-1 * (var(--rail) + var(--rail-gap)));
+    }
+
+    .intro.has-photo .photo {
+      width: var(--rail);
     }
   }
 </style>

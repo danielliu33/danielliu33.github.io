@@ -1,28 +1,49 @@
 ---
-import { getCollection } from 'astro:content';
+/**
+ * Case studies as a dated list.
+ * - home: "2026 | Built a multi-agent platform from zero. (write-up)"
+ * - index (/work/): title link, then the organization and the case study's one-liner.
+ */
+import { getWork, workHref } from '../lib/work';
 import { smart } from '../lib/typography';
 
 interface Props {
-  headingLevel?: 2 | 3;
+  variant?: 'home' | 'index';
 }
 
-const { headingLevel = 3 } = Astro.props;
-const Heading = `h${headingLevel}` as 'h2' | 'h3';
-const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+const { variant = 'home' } = Astro.props;
+const work = await getWork();
 ---
 
-<ul class="entries">
+<ul class:list={['dated', { 'dated-index': variant === 'index' }]}>
   {
     work.map((item) => (
-      <li class="entry">
-        <Heading class="entry-title">
-          <a href={`/work/${item.id}/`}>{smart(item.data.title)}</a>
-        </Heading>
-        <p class="meta">
-          {item.data.org} · {item.data.years}
-        </p>
-        <p class="entry-text">{smart(item.data.one_liner)}</p>
+      <li>
+        <span class="date">{item.data.years}</span>
+        {variant === 'home' ? (
+          <span>
+            {item.text}{' '}
+            <a class="aux" href={workHref(item)}>
+              (write-up)
+            </a>
+          </span>
+        ) : (
+          <span>
+            <a class="title" href={workHref(item)}>
+              {smart(item.data.title)}
+            </a>
+            <span class="desc">
+              <span class="note">{item.data.org}.</span> {smart(item.data.one_liner)}
+            </span>
+          </span>
+        )}
       </li>
     ))
   }
 </ul>
+
+<style>
+  .desc {
+    margin-bottom: 0.6rem;
+  }
+</style>

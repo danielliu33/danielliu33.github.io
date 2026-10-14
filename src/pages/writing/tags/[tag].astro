@@ -34,16 +34,11 @@ const { name, posts } = Astro.props;
     <p class="label"><a href="/writing/">Writing</a></p>
     <h1 class="page-title">Tagged “{name}”</h1>
   </header>
-  <PostList posts={posts} headingLevel={2} />
+  <PostList posts={posts} showDescription />
 </BaseLayout>
 
 <style>
   .label a {
     color: inherit;
-    text-decoration: none;
-  }
-
-  .label a:hover {
-    color: var(--accent);
   }
 </style>

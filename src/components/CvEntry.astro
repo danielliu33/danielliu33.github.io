@@ -1,0 +1,45 @@
+---
+/** One CV entry: heading — subheading, years flush right, bullets, nested roles. */
+import type { CvEntry } from '../data/profile';
+
+interface Props {
+  entry: CvEntry;
+  /** Nested role under an employer (rendered in italics, indented). */
+  nested?: boolean;
+}
+
+const { entry, nested = false } = Astro.props;
+// Publications and patents put the authors / publication line under the title.
+const subBelow = Boolean(entry.url);
+---
+
+<div class:list={['cv-entry', { 'cv-nested': nested }]}>
+  <p class="cv-line">
+    <span class="cv-what">
+      {
+        nested ? (
+          <em>{entry.heading}</em>
+        ) : entry.url ? (
+          <a class="cv-strong" href={entry.url}>
+            {entry.heading}
+          </a>
+        ) : (
+          <span class="cv-strong">{entry.heading}</span>
+        )
+      }
+      {entry.subheading && !subBelow && <span class="cv-sub"> — <em>{entry.subheading}</em></span>}
+    </span>
+    {entry.years && <span class="cv-years">{entry.years}</span>}
+  </p>
+  {entry.subheading && subBelow && <p class="cv-sub-below">{entry.subheading}</p>}
+  {
+    entry.bullets && entry.bullets.length > 0 && (
+      <ul>
+        {entry.bullets.map((b) => (
+          <li>{b}</li>
+        ))}
+      </ul>
+    )
+  }
+  {entry.chapters && entry.chapters.map((chapter) => <Astro.self entry={chapter} nested />)}
+</div>

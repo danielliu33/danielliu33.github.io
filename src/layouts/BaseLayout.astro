@@ -1,12 +1,15 @@
 ---
-import '@fontsource-variable/newsreader/opsz.css';
-import '@fontsource-variable/newsreader/opsz-italic.css';
+// Static EB Garamond (not a variable font): Chrome embeds variable fonts in
+// PDFs as Type 3, which copy-pastes as garbled text, so the CV PDF needs these.
+import '@fontsource/eb-garamond/latin-400.css';
+import '@fontsource/eb-garamond/latin-500.css';
+import '@fontsource/eb-garamond/latin-400-italic.css';
 import '../styles/global.css';
-import newsreaderLatin from '@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2?url';
+import garamondLatin from '@fontsource/eb-garamond/files/eb-garamond-latin-400-normal.woff2?url';
 import katexCss from 'katex/dist/katex.min.css?url';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { site } from '../data/profile';
+import { site, twitter } from '../data/profile';
 import { getPosts } from '../lib/posts';
 
 interface Props {
@@ -22,7 +25,7 @@ interface Props {
   noindex?: boolean;
   /** JSON-LD object to embed. */
   jsonLd?: Record<string, unknown>;
-  /** Extra class on <main>, e.g. for the résumé's print layout. */
+  /** Extra class on <main>, e.g. for the CV's print layout. */
   mainClass?: string;
 }
 
@@ -39,7 +42,7 @@ const {
 } = Astro.props;
 
 const fullTitle = title ? `${title} — ${site.name}` : site.name;
-// noindex pages (404, the empty Writing index, drafts) get no canonical URL.
+// noindex pages (404, the CV print source, the empty Writing index, drafts) get no canonical URL.
 const canonical = noindex ? null : new URL(Astro.url.pathname, Astro.site).href;
 // Advertise the feed only once there is something in it.
 const hasPosts = (await getPosts()).length > 0;
@@ -52,33 +55,20 @@ const rss = new URL('/rss.xml', Astro.site).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script is:inline>
-      (function () {
-        var t = null;
-        try {
-          t = localStorage.getItem('theme');
-        } catch (e) {}
-        if (t !== 'light' && t !== 'dark') {
-          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        document.documentElement.setAttribute('data-theme', t);
-        document.documentElement.style.colorScheme = t;
-      })();
-    </script>
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta name="author" content={site.name} />
     {canonical && <link rel="canonical" href={canonical} />}
     {noindex && <meta name="robots" content="noindex" />}
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#faf8f4" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1a1815" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f4f3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161615" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     {hasPosts && <link rel="alternate" type="application/rss+xml" title={`${site.name} — Writing`} href={rss} />}
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="preload" href={newsreaderLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={garamondLatin} as="font" type="font/woff2" crossorigin />
     {math && <link rel="stylesheet" href={katexCss} />}
 
     <meta property="og:site_name" content={site.name} />
@@ -94,6 +84,7 @@ const rss = new URL('/rss.xml', Astro.site).href;
     {publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
     {modifiedTime && <meta property="article:modified_time" content={modifiedTime.toISOString()} />}
     <meta name="twitter:card" content="summary_large_image" />
+    {twitter && <meta name="twitter:creator" content={twitter.handle} />}
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
@@ -107,42 +98,8 @@ const rss = new URL('/rss.xml', Astro.site).href;
     </main>
     <Footer showRss={hasPosts} />
     <script is:inline>
+      // Assemble obfuscated email links (see components/Email.astro).
       (function () {
-        var root = document.documentElement;
-        var btn = document.getElementById('theme-toggle');
-        var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-        var metas = document.querySelectorAll('meta[name="theme-color"]');
-        // Apply a theme to the page, the browser canvas and the browser UI color.
-        var apply = function (t) {
-          root.setAttribute('data-theme', t);
-          root.style.colorScheme = t;
-          for (var m = 0; m < metas.length; m++) {
-            metas[m].setAttribute('content', t === 'dark' ? '#1a1815' : '#faf8f4');
-          }
-          if (btn) btn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
-        };
-        apply(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-        if (btn) {
-          btn.hidden = false;
-          btn.addEventListener('click', function () {
-            var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            apply(next);
-            try {
-              // Choosing the system theme again goes back to following the system.
-              if (mq && next === (mq.matches ? 'dark' : 'light')) localStorage.removeItem('theme');
-              else localStorage.setItem('theme', next);
-            } catch (e) {}
-          });
-        }
-        if (mq && mq.addEventListener) {
-          mq.addEventListener('change', function (e) {
-            var saved = null;
-            try {
-              saved = localStorage.getItem('theme');
-            } catch (err) {}
-            if (saved !== 'light' && saved !== 'dark') apply(e.matches ? 'dark' : 'light');
-          });
-        }
         var nodes = document.querySelectorAll('[data-eu]');
         for (var i = 0; i < nodes.length; i++) {
           var el = nodes[i];

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { legacyFiles } from '../lib/legacy-redirects.mjs';
 ---
 
 <BaseLayout title="Page not found" noindex>
@@ -9,4 +10,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <p class="lede">The page you were looking for doesn’t exist or has moved.</p>
   </header>
   <p><a href="/">Go to the home page</a>, or see <a href="/work/">selected work</a>.</p>
+
+  <!-- GitHub Pages serves this page for any missing path; forward old file URLs. -->
+  <script is:inline define:vars={{ legacyFiles }}>
+    var to = legacyFiles[location.pathname];
+    if (to) location.replace(to);
+  </script>
 </BaseLayout>

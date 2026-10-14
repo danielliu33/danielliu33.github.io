@@ -31,25 +31,24 @@ const name = 'Daniel Liu';
 const headline = 'I build AI agents, and the evaluations that decide whether they ship.';
 const host = 'danielliu33.github.io';
 
-const font = readFileSync(
-  join(root, 'node_modules/@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2'),
-).toString('base64');
+const fontFile = (weight) =>
+  readFileSync(join(root, `node_modules/@fontsource/eb-garamond/files/eb-garamond-latin-${weight}-normal.woff2`)).toString('base64');
 
+// Same look as the site: EB Garamond, black on #f4f4f3, no decoration.
 const html = `<!doctype html>
 <html><head><meta charset="utf-8"><style>
-@font-face { font-family: 'Newsreader'; src: url(data:font/woff2;base64,${font}) format('woff2'); font-weight: 200 800; }
+@font-face { font-family: 'EB Garamond'; src: url(data:font/woff2;base64,${fontFile(400)}) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'EB Garamond'; src: url(data:font/woff2;base64,${fontFile(500)}) format('woff2'); font-weight: 500; }
 html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
-body { background: #faf8f4; color: #1d1b18; font-family: 'Newsreader', Georgia, serif; font-optical-sizing: auto;
-  display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; padding: 92px 100px 76px; }
-.name { font-size: 46px; font-weight: 500; letter-spacing: -0.01em; margin: 0; }
-.headline { font-size: 68px; line-height: 1.12; font-weight: 400; letter-spacing: -0.018em; margin: 0; max-width: 980px; }
-.foot { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #ddd6ca; padding-top: 26px;
-  font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase; color: #6a6358; }
-.dot { width: 12px; height: 12px; border-radius: 50%; background: #9a3a17; }
+body { background: #f4f4f3; color: #000; font-family: 'EB Garamond', Georgia, serif;
+  display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; padding: 96px 110px 84px; }
+.name { font-size: 44px; font-weight: 400; margin: 0; }
+.headline { font-size: 72px; line-height: 1.12; font-weight: 400; margin: 0; max-width: 960px; }
+.foot { font-size: 30px; color: #3f3f6d; margin: 0; }
 </style></head><body>
 <p class="name">${name}</p>
 <p class="headline">${headline}</p>
-<div class="foot"><span>${host}</span><span class="dot"></span></div>
+<p class="foot">${host}</p>
 </body></html>`;
 
 const dir = mkdtempSync(join(tmpdir(), 'og-'));

@@ -3,7 +3,7 @@
  * against this site's code-block backgrounds, in both themes. Works with
  * dual themes rendered as CSS variables (--shiki-light / --shiki-dark).
  */
-const BACKGROUNDS = { light: '#f2eee6', dark: '#24211d' };
+const BACKGROUNDS = { light: '#eaeae7', dark: '#20201e' }; // --bg-soft in global.css
 const MIN_RATIO = 4.6;
 
 const parse = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));

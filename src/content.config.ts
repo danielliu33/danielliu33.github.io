@@ -31,7 +31,7 @@ function writingLoader(): Loader {
   };
 }
 
-// Case studies ("Selected work").
+// Case studies. Their order and home-page summaries live in src/data/profile.ts (selectedWork).
 const work = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/work' }),
   schema: z.object({
@@ -39,7 +39,6 @@ const work = defineCollection({
     org: z.string(),
     years: z.string(),
     one_liner: z.string(),
-    order: z.number(),
   }),
 });
 

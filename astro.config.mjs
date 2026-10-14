@@ -9,25 +9,35 @@ import { rehypeHeadingAnchors } from './src/lib/rehype-heading-anchors.mjs';
 import { remarkMathExtras } from './src/lib/remark-math-extras.mjs';
 import { hasPublishedPosts } from './src/lib/published-posts.mjs';
 import { shikiContrast } from './src/lib/shiki-contrast.mjs';
+import { legacyPages } from './src/lib/legacy-redirects.mjs';
 
 const writingIsLive = hasPublishedPosts();
+
+// Pages that are never in the sitemap: the CV print source (noindex) and the
+// redirect pages for old URLs.
+const unlisted = ['/404/', '/cv/', ...Object.keys(legacyPages)];
 
 export default defineConfig({
   site: 'https://danielliu33.github.io',
   trailingSlash: 'always',
   build: { format: 'directory' },
   devToolbar: { enabled: false },
+  // Static redirect pages (meta refresh + canonical + noindex) for old URLs.
+  redirects: legacyPages,
   integrations: [
     mdx(),
     sitemap({
       // Keep the empty Writing section out of the sitemap until a post is published.
-      filter: (page) => !page.endsWith('/404/') && (writingIsLive || !page.includes('/writing/')),
+      filter: (page) => {
+        const path = new URL(page).pathname;
+        return !unlisted.includes(path) && (writingIsLive || !path.startsWith('/writing/'));
+      },
     }),
   ],
   markdown: {
     shikiConfig: {
       themes: { light: 'github-light', dark: 'github-dark' },
-      // Colors are applied from CSS variables so the theme toggle controls code too.
+      // Colors are applied from CSS variables, so code follows the light/dark color scheme.
       defaultColor: false,
       transformers: [shikiContrast()],
     },

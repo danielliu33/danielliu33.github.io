@@ -1,41 +1,31 @@
 ---
-import { formatDate, isDraft, isoDate, postHref, type Post } from '../lib/posts';
+/** Posts as a dated list: "2026 Oct | Title", optionally with the description below. */
+import { formatMonth, isDraft, isoMonth, postHref, type Post } from '../lib/posts';
 import { smart } from '../lib/typography';
 
 interface Props {
   posts: Post[];
   showDescription?: boolean;
-  /** 2 when the list sits directly under the page <h1>, 3 under a section <h2>. */
-  headingLevel?: 2 | 3;
 }
 
-const { posts, showDescription = true, headingLevel = 3 } = Astro.props;
-const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const { posts, showDescription = false } = Astro.props;
 ---
 
-<ul class="entries posts">
+<ul class="dated">
   {
     posts.map((post) => (
-      <li class="entry">
-        <p class="meta">
-          <time datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time>
-          {isDraft(post) && <span class="draft"> · Draft</span>}
-        </p>
-        <Heading class="entry-title">
-          <a href={postHref(post)}>{smart(post.data.title)}</a>
-        </Heading>
-        {showDescription && <p class="entry-text">{smart(post.data.description)}</p>}
+      <li>
+        <time class="date" datetime={isoMonth(post.data.date)}>
+          {formatMonth(post.data.date)}
+        </time>
+        <span>
+          <a class="title" href={postHref(post)}>
+            {smart(post.data.title)}
+          </a>
+          {isDraft(post) && <span class="draft"> (draft)</span>}
+          {showDescription && <span class="desc">{smart(post.data.description)}</span>}
+        </span>
       </li>
     ))
   }
 </ul>
-
-<style>
-  .posts .entry + .entry {
-    margin-top: 1.75rem;
-  }
-
-  .draft {
-    color: var(--accent);
-  }
-</style>

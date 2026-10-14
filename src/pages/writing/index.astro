@@ -13,12 +13,12 @@ const tags = [...new Set(posts.flatMap((p) => p.data.tags))].sort((a, b) => a.lo
     <p class="lede">Essays and notes on AI agents, evaluation, and post-training.</p>
   </header>
 
-  {posts.length > 0 ? <PostList posts={posts} headingLevel={2} /> : <p class="empty">Nothing published yet.</p>}
+  {posts.length > 0 ? <PostList posts={posts} showDescription /> : <p class="empty">Nothing published yet.</p>}
 
   {
     tags.length > 0 && (
       <section class="section" aria-labelledby="tags">
-        <h2 id="tags" class="section-label">Tags</h2>
+        <h2 id="tags" class="section-title">Tags</h2>
         <ul class="tags">
           {tags.map((tag) => (
             <li>
@@ -47,15 +47,13 @@ const tags = [...new Set(posts.flatMap((p) => p.data.tags))].sort((a, b) => a.lo
   .tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem 1rem;
+    gap: 0.25rem 1rem;
     list-style: none;
     margin: 0;
     padding: 0;
-    font-family: var(--sans);
-    font-size: 0.875rem;
   }
 
   .section-more {
-    margin-top: 3rem;
+    margin-top: 2rem;
   }
 </style>

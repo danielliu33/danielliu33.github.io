@@ -40,13 +40,16 @@ export function readingMinutes(body: string = ''): number {
   return Math.max(1, Math.round(words / 230));
 }
 
-export function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
+/** Post dates show year and month only: "2026 Oct" in lists. */
+export function formatMonth(date: Date): string {
+  const month = date.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
+  return `${date.getUTCFullYear()} ${month}`;
 }
 
-export const isoDate = (date: Date): string => date.toISOString().slice(0, 10);
+/** "October 2026", for the post page. */
+export function formatMonthLong(date: Date): string {
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', timeZone: 'UTC' });
+}
+
+/** Machine-readable month for <time datetime>: "2026-10". */
+export const isoMonth = (date: Date): string => date.toISOString().slice(0, 7);

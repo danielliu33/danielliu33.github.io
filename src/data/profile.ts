@@ -29,7 +29,7 @@ export const site: {
    * WebP; its size is read at build time). It is shown about 180px wide to the
    * left of the bio (above it on phones).
    */
-  photo: '',
+  photo: '/photo.jpg',
 };
 
 /** Email is split so the address never appears whole in the HTML source. */
@@ -47,7 +47,7 @@ export const links: Record<'linkedin' | 'linkedinLabel' | 'twitter' | 'cvPdf' | 
    * Full profile URL, e.g. 'https://x.com/yourhandle'. Empty hides every
    * Twitter link (home page, CV, JSON-LD, social meta).
    */
-  twitter: '',
+  twitter: 'https://x.com/_danielliu_',
   /** The CV PDF, written by `npm run pdf`. */
   cvPdf: '/cv.pdf',
   cvFileName: 'Daniel-Liu-CV.pdf',
